@@ -673,6 +673,28 @@ export async function openDraft(uuid: string): Promise<boolean> {
   return result === 'SUCCESS';
 }
 
+/**
+ * Open a workspace by name in Drafts
+ */
+export async function openWorkspace(name: string): Promise<boolean> {
+  const escapedName = escapeAppleScriptString(name);
+
+  const script = `
+    tell application "Drafts"
+      try
+        activate
+        open workspace "${escapedName}"
+        return "SUCCESS"
+      on error errMsg
+        return "ERROR: " & errMsg
+      end try
+    end tell
+  `;
+
+  const result = await executeAppleScript(script);
+  return result === 'SUCCESS';
+}
+
 // Helper functions for parsing AppleScript output
 
 /**

@@ -418,6 +418,27 @@ const TOOLS: Tool[] = [
       openWorldHint: false,
     },
   },
+  {
+    name: 'drafts_open_workspace',
+    description: 'Open a workspace by name in Drafts',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'The name of the workspace to open',
+        },
+      },
+      required: ['name'],
+    },
+    annotations: {
+      title: 'Open Workspace',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
 ];
 
 /**
@@ -430,7 +451,7 @@ class DraftsMCPServer {
     this.server = new Server(
       {
         name: 'drafts-mcp-server',
-        version: '1.0.0',
+        version: '1.0.5',
       },
       {
         capabilities: {
@@ -728,6 +749,22 @@ class DraftsMCPServer {
                 {
                   type: 'text',
                   text: success ? `Trashed draft ${uuid}` : `Failed to trash draft ${uuid}`,
+                },
+              ],
+              isError: !success,
+            };
+          }
+
+          case 'drafts_open_workspace': {
+            const { name: workspaceName } = args as { name: string };
+            const success = await drafts.openWorkspace(workspaceName);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: success
+                    ? `Opened workspace "${workspaceName}"`
+                    : `Failed to open workspace "${workspaceName}"`,
                 },
               ],
               isError: !success,
