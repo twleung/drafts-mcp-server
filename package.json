@@ -1,11 +1,12 @@
 {
   "name": "@agiletortoise/drafts-mcp-server",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Model Context Protocol server for Drafts app on macOS via AppleScript.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "drafts-mcp-server": "dist/index.js"
+    "drafts-mcp-server": "dist/index.js",
+    "drafts": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -36,7 +37,8 @@
     "darwin"
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.4"
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "commander": "^14.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

@@ -13,6 +13,71 @@ For additional discussion of uses, see [the Drafts forum](https://forums.getdraf
 - 🔍 **Search**: Full-text search across all drafts
 - 🚩 **Flags & Archive**: Flag, archive, or trash drafts
 
+## CLI Tool
+
+In addition to the MCP server, this package includes a standalone `drafts` CLI for interacting with Drafts directly from the terminal.
+
+### CLI Installation
+
+```bash
+# Install globally from npm
+npm install -g @agiletortoise/drafts-mcp-server
+
+# Or link locally for development
+git clone https://github.com/agiletortoise/drafts-mcp-server.git
+cd drafts-mcp-server
+npm install
+npm run build
+npm link
+```
+
+After installation, the `drafts` command is available globally.
+
+### CLI Usage
+
+Output is human-readable by default. Add `--json` for machine-readable JSON output.
+
+```bash
+# Workspaces
+drafts workspace list
+drafts workspace current
+drafts workspace open "Work"
+drafts workspace drafts "Work" --folder inbox
+
+# Tags
+drafts tag list
+drafts tag get "work"
+
+# List and search drafts
+drafts list
+drafts list --folder inbox --tag work --flagged
+drafts list --created-after 2025-01-01 --modified-before 2025-06-30
+drafts search "meeting notes"
+
+# Single draft operations
+drafts current
+drafts get <uuid>
+drafts create "Hello world" --tag notes --tag ideas --flagged
+drafts update <uuid> "Updated content"
+drafts open <uuid>
+
+# Organize drafts
+drafts flag <uuid>
+drafts flag <uuid> --unflag
+drafts archive <uuid>
+drafts inbox <uuid>
+drafts trash <uuid>
+drafts add-tags <uuid> important urgent
+
+# Actions
+drafts action list
+drafts action run <draft-uuid> "Send to Email"
+
+# JSON output for scripting
+drafts --json list --folder inbox
+drafts --json search "budget"
+```
+
 ## Requirements
 
 - macOS (AppleScript is macOS-only)
@@ -362,6 +427,7 @@ npm run inspector
 drafts-mcp-server/
 ├── src/
 │   ├── index.ts           # Main MCP server implementation
+│   ├── cli.ts             # Standalone CLI tool
 │   ├── drafts.ts          # Drafts-specific operations
 │   └── applescript.ts     # AppleScript execution utilities
 ├── dist/                  # Compiled JavaScript (generated)
