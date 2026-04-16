@@ -1,6 +1,6 @@
 {
   "name": "@agiletortoise/drafts-mcp-server",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "Model Context Protocol server for Drafts app on macOS via AppleScript.",
   "type": "module",
   "main": "dist/index.js",
@@ -9,7 +9,8 @@
     "drafts": "dist/cli.js"
   },
   "files": [
-    "dist",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
     "README.md",
     "LICENSE"
   ],
