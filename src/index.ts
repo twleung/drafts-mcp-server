@@ -40,7 +40,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'drafts_get_tag',
-    description: 'Get a tag and its associated drafts',
+    description: 'Get a tag and its associated drafts. Returns summaries (no content) — use drafts_get_draft for full content.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -85,7 +85,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'drafts_get_workspace_drafts',
-    description: 'Get drafts from a specific workspace, optionally filtered by folder',
+    description: 'Get drafts from a specific workspace, optionally filtered by folder. Returns summaries (no content) — use drafts_get_draft for full content.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -109,7 +109,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'drafts_get_drafts',
-    description: 'Get drafts with flexible filtering by content, folder, tag, flagged status, and dates',
+    description: 'Get drafts with flexible filtering by content, folder, tag, flagged status, and dates. Returns summaries (no content) — use drafts_get_draft for full content.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -256,7 +256,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'drafts_search',
-    description: 'Search for drafts using a query string',
+    description: 'Search for drafts using a query string. Returns summaries (no content) — use drafts_get_draft for full content.',
     inputSchema: {
       type: 'object',
       properties: {

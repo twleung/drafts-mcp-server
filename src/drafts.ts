@@ -5,24 +5,27 @@ export interface Workspace {
   uuid?: string;
 }
 
-export interface Draft {
+export interface DraftSummary {
   id: string;
   title: string;
-  content: string;
   flagged: boolean;
   folder: 'inbox' | 'archive' | 'trash';
   tags: string[];
   /** Comma-separated string of tag names */
   tagNames: string;
-  /** Query tag names string */
-  queryTagNames: string;
   /** ISO 8601 date string */
   creationDate: string;
   /** ISO 8601 date string */
   modificationDate: string;
+  permalink: string;
+}
+
+export interface Draft extends DraftSummary {
+  content: string;
+  /** Query tag names string */
+  queryTagNames: string;
   /** ISO 8601 date string */
   accessDate: string;
-  permalink: string;
   creationLatitude: number;
   creationLongitude: number;
   modificationLatitude: number;
@@ -36,7 +39,7 @@ export interface Action {
 
 export interface Tag {
   name: string;
-  drafts?: Draft[];
+  drafts?: DraftSummary[];
 }
 
 export interface DraftFilter {
@@ -132,7 +135,7 @@ export async function getCurrentDraft(): Promise<Draft | null> {
 export async function getWorkspaceDrafts(
   workspaceName: string,
   folder?: 'inbox' | 'archive' | 'trash'
-): Promise<Draft[]> {
+): Promise<DraftSummary[]> {
   const escapedWorkspace = escapeAppleScriptString(workspaceName);
 
   const script = `
@@ -148,22 +151,7 @@ export async function getWorkspaceDrafts(
       set results to ""
       repeat with d in matchingDrafts
         set theDraft to contents of d
-        set props to "ID:" & id of theDraft
-        set props to props & "<<SEP>>TITLE:" & title of theDraft
-        set props to props & "<<SEP>>CONTENT:" & content of theDraft
-        set props to props & "<<SEP>>FLAGGED:" & flagged of theDraft
-        set props to props & "<<SEP>>FOLDER:" & folder of theDraft
-        set props to props & "<<SEP>>TAGS:" & ((tag list of theDraft) as string)
-        set props to props & "<<SEP>>TAG_NAMES:" & tag names of theDraft
-        set props to props & "<<SEP>>QUERY_TAG_NAMES:" & query tag names of theDraft
-        set props to props & "<<SEP>>CREATED:" & my formatDateToISO(creation date of theDraft)
-        set props to props & "<<SEP>>MODIFIED:" & my formatDateToISO(modification date of theDraft)
-        set props to props & "<<SEP>>ACCESSED:" & my formatDateToISO(access date of theDraft)
-        set props to props & "<<SEP>>PERMALINK:" & permalink of theDraft
-        set props to props & "<<SEP>>CREATION_LAT:" & creation latitude of theDraft
-        set props to props & "<<SEP>>CREATION_LON:" & creation longitude of theDraft
-        set props to props & "<<SEP>>MODIFICATION_LAT:" & modification latitude of theDraft
-        set props to props & "<<SEP>>MODIFICATION_LON:" & modification longitude of theDraft
+        ${summaryPropsScript}
         set results to results & props & "<<END>>"
       end repeat
 
@@ -172,7 +160,7 @@ export async function getWorkspaceDrafts(
   `;
 
   const result = await executeAppleScript(script);
-  return parseDraftsList(result);
+  return parseSummaryList(result);
 }
 
 /**
@@ -198,6 +186,20 @@ end formatDateToISO
 `;
 
 /**
+ * AppleScript snippet to collect summary properties (no content, no geo coordinates).
+ * Assumes `theDraft` is already set in the calling scope.
+ */
+const summaryPropsScript = `set props to "ID:" & id of theDraft
+        set props to props & "<<SEP>>TITLE:" & title of theDraft
+        set props to props & "<<SEP>>FLAGGED:" & flagged of theDraft
+        set props to props & "<<SEP>>FOLDER:" & folder of theDraft
+        set props to props & "<<SEP>>TAGS:" & ((tag list of theDraft) as string)
+        set props to props & "<<SEP>>TAG_NAMES:" & tag names of theDraft
+        set props to props & "<<SEP>>CREATED:" & my formatDateToISO(creation date of theDraft)
+        set props to props & "<<SEP>>MODIFIED:" & my formatDateToISO(modification date of theDraft)
+        set props to props & "<<SEP>>PERMALINK:" & permalink of theDraft`;
+
+/**
  * Generate AppleScript code to create a date from ISO string (locale-independent)
  * Returns AppleScript code that constructs a date object programmatically
  */
@@ -215,7 +217,7 @@ set seconds of ${varName} to 0`;
 /**
  * Get drafts with flexible filtering
  */
-export async function getDrafts(filter: DraftFilter): Promise<Draft[]> {
+export async function getDrafts(filter: DraftFilter): Promise<DraftSummary[]> {
   const conditions: string[] = [];
   const dateSetup: string[] = [];
 
@@ -270,22 +272,7 @@ export async function getDrafts(filter: DraftFilter): Promise<Draft[]> {
       set results to ""
       repeat with d in matchingDrafts
         set theDraft to contents of d
-        set props to "ID:" & id of theDraft
-        set props to props & "<<SEP>>TITLE:" & title of theDraft
-        set props to props & "<<SEP>>CONTENT:" & content of theDraft
-        set props to props & "<<SEP>>FLAGGED:" & flagged of theDraft
-        set props to props & "<<SEP>>FOLDER:" & folder of theDraft
-        set props to props & "<<SEP>>TAGS:" & ((tag list of theDraft) as string)
-        set props to props & "<<SEP>>TAG_NAMES:" & tag names of theDraft
-        set props to props & "<<SEP>>QUERY_TAG_NAMES:" & query tag names of theDraft
-        set props to props & "<<SEP>>CREATED:" & my formatDateToISO(creation date of theDraft)
-        set props to props & "<<SEP>>MODIFIED:" & my formatDateToISO(modification date of theDraft)
-        set props to props & "<<SEP>>ACCESSED:" & my formatDateToISO(access date of theDraft)
-        set props to props & "<<SEP>>PERMALINK:" & permalink of theDraft
-        set props to props & "<<SEP>>CREATION_LAT:" & creation latitude of theDraft
-        set props to props & "<<SEP>>CREATION_LON:" & creation longitude of theDraft
-        set props to props & "<<SEP>>MODIFICATION_LAT:" & modification latitude of theDraft
-        set props to props & "<<SEP>>MODIFICATION_LON:" & modification longitude of theDraft
+        ${summaryPropsScript}
         set results to results & props & "<<END>>"
       end repeat
 
@@ -294,7 +281,7 @@ export async function getDrafts(filter: DraftFilter): Promise<Draft[]> {
   `;
 
   const result = await executeAppleScript(script);
-  return parseDraftsList(result);
+  return parseSummaryList(result);
 }
 
 /**
@@ -495,22 +482,7 @@ export async function getTag(tagName: string): Promise<Tag> {
       set results to ""
       repeat with d in draftList
         set theDraft to contents of d
-        set props to "ID:" & id of theDraft
-        set props to props & "<<SEP>>TITLE:" & title of theDraft
-        set props to props & "<<SEP>>CONTENT:" & content of theDraft
-        set props to props & "<<SEP>>FLAGGED:" & flagged of theDraft
-        set props to props & "<<SEP>>FOLDER:" & folder of theDraft
-        set props to props & "<<SEP>>TAGS:" & ((tag list of theDraft) as string)
-        set props to props & "<<SEP>>TAG_NAMES:" & tag names of theDraft
-        set props to props & "<<SEP>>QUERY_TAG_NAMES:" & query tag names of theDraft
-        set props to props & "<<SEP>>CREATED:" & my formatDateToISO(creation date of theDraft)
-        set props to props & "<<SEP>>MODIFIED:" & my formatDateToISO(modification date of theDraft)
-        set props to props & "<<SEP>>ACCESSED:" & my formatDateToISO(access date of theDraft)
-        set props to props & "<<SEP>>PERMALINK:" & permalink of theDraft
-        set props to props & "<<SEP>>CREATION_LAT:" & creation latitude of theDraft
-        set props to props & "<<SEP>>CREATION_LON:" & creation longitude of theDraft
-        set props to props & "<<SEP>>MODIFICATION_LAT:" & modification latitude of theDraft
-        set props to props & "<<SEP>>MODIFICATION_LON:" & modification longitude of theDraft
+        ${summaryPropsScript}
         set results to results & props & "<<END>>"
       end repeat
       return results
@@ -518,15 +490,15 @@ export async function getTag(tagName: string): Promise<Tag> {
   `;
 
   const result = await executeAppleScript(script);
-  const drafts = parseDraftsList(result);
+  const draftSummaries = parseSummaryList(result);
 
-  return { name: tagName, drafts };
+  return { name: tagName, drafts: draftSummaries };
 }
 
 /**
  * Search for drafts
  */
-export async function searchDrafts(query: string): Promise<Draft[]> {
+export async function searchDrafts(query: string): Promise<DraftSummary[]> {
   const escapedQuery = escapeAppleScriptString(query);
 
   const script = `
@@ -536,22 +508,7 @@ export async function searchDrafts(query: string): Promise<Draft[]> {
       set results to ""
       repeat with d in searchResults
         set theDraft to contents of d
-        set props to "ID:" & id of theDraft
-        set props to props & "<<SEP>>TITLE:" & title of theDraft
-        set props to props & "<<SEP>>CONTENT:" & content of theDraft
-        set props to props & "<<SEP>>FLAGGED:" & flagged of theDraft
-        set props to props & "<<SEP>>FOLDER:" & folder of theDraft
-        set props to props & "<<SEP>>TAGS:" & ((tag list of theDraft) as string)
-        set props to props & "<<SEP>>TAG_NAMES:" & tag names of theDraft
-        set props to props & "<<SEP>>QUERY_TAG_NAMES:" & query tag names of theDraft
-        set props to props & "<<SEP>>CREATED:" & my formatDateToISO(creation date of theDraft)
-        set props to props & "<<SEP>>MODIFIED:" & my formatDateToISO(modification date of theDraft)
-        set props to props & "<<SEP>>ACCESSED:" & my formatDateToISO(access date of theDraft)
-        set props to props & "<<SEP>>PERMALINK:" & permalink of theDraft
-        set props to props & "<<SEP>>CREATION_LAT:" & creation latitude of theDraft
-        set props to props & "<<SEP>>CREATION_LON:" & creation longitude of theDraft
-        set props to props & "<<SEP>>MODIFICATION_LAT:" & modification latitude of theDraft
-        set props to props & "<<SEP>>MODIFICATION_LON:" & modification longitude of theDraft
+        ${summaryPropsScript}
         set results to results & props & "<<END>>"
       end repeat
       return results
@@ -559,7 +516,7 @@ export async function searchDrafts(query: string): Promise<Draft[]> {
   `;
 
   const result = await executeAppleScript(script);
-  return parseDraftsList(result);
+  return parseSummaryList(result);
 }
 
 /**
@@ -703,6 +660,40 @@ export async function openWorkspace(name: string): Promise<boolean> {
 function parseAppleScriptDate(dateStr: string): string {
   // Dates are now returned in ISO format from AppleScript: "2025-11-10T07:56:32Z"
   return dateStr;
+}
+
+function parseSummaryProperties(propsStr: string): DraftSummary {
+  const props: Record<string, string> = {};
+  const parts = propsStr.split('<<SEP>>');
+
+  for (const part of parts) {
+    const colonIdx = part.indexOf(':');
+    if (colonIdx !== -1) {
+      const key = part.substring(0, colonIdx);
+      const value = part.substring(colonIdx + 1);
+      props[key] = value;
+    }
+  }
+
+  return {
+    id: props['ID'] || '',
+    title: props['TITLE'] || '',
+    flagged: props['FLAGGED'] === 'true',
+    folder: (props['FOLDER'] || 'inbox') as 'inbox' | 'archive' | 'trash',
+    tags: props['TAGS'] ? props['TAGS'].split(', ').filter(t => t) : [],
+    tagNames: props['TAG_NAMES'] || '',
+    creationDate: props['CREATED'] ? parseAppleScriptDate(props['CREATED']) : '',
+    modificationDate: props['MODIFIED'] ? parseAppleScriptDate(props['MODIFIED']) : '',
+    permalink: props['PERMALINK'] || '',
+  };
+}
+
+function parseSummaryList(output: string): DraftSummary[] {
+  if (!output || output.trim() === '') {
+    return [];
+  }
+
+  return output.split('<<END>>').filter(e => e.trim() !== '').map(parseSummaryProperties);
 }
 
 function parseDraftProperties(propsStr: string): Draft {

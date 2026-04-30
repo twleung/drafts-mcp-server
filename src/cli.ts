@@ -8,7 +8,7 @@ const program = new Command();
 program
   .name('drafts')
   .description('CLI for interacting with the macOS Drafts app')
-  .version('1.0.10')
+  .version('1.0.11')
   .option('--json', 'Output raw JSON instead of formatted tables');
 
 // --- Formatting helpers ---
@@ -57,7 +57,7 @@ function table(headers: string[], rows: string[][]): string {
   return [headerLine, sep, ...dataLines].join('\n');
 }
 
-function formatDraftRow(d: drafts.Draft): string[] {
+function formatDraftRow(d: drafts.DraftSummary): string[] {
   return [
     shortId(d.id),
     truncate(d.title || '(untitled)', 40),
@@ -68,7 +68,7 @@ function formatDraftRow(d: drafts.Draft): string[] {
   ];
 }
 
-function formatDraftTable(list: drafts.Draft[]): string {
+function formatDraftTable(list: drafts.DraftSummary[]): string {
   if (list.length === 0) return 'No drafts found.';
   const headers = ['ID', 'Title', 'Folder', 'Flag', 'Tags', 'Modified'];
   const rows = list.map(formatDraftRow);
