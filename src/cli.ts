@@ -32,10 +32,6 @@ function truncate(str: string, max: number): string {
   return str.slice(0, max - 1) + '\u2026';
 }
 
-function shortId(uuid: string): string {
-  return uuid.slice(0, 8);
-}
-
 function shortDate(iso: string): string {
   if (!iso) return '';
   return iso.replace('T', ' ').replace('Z', '');
@@ -59,7 +55,7 @@ function table(headers: string[], rows: string[][]): string {
 
 function formatDraftRow(d: drafts.DraftSummary): string[] {
   return [
-    shortId(d.id),
+    d.id,
     truncate(d.title || '(untitled)', 40),
     d.folder,
     d.flagged ? '\u2691' : '',
