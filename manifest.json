@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "drafts-mcp-server",
   "display_name": "Drafts",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "MCP server for interacting with the Drafts app on macOS",
   "long_description": "A Model Context Protocol (MCP) server that enables AI assistants to interact with the Drafts app on macOS through AppleScript. Manage drafts, workspaces, tags, and run actions programmatically.",
   "author": {

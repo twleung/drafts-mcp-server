@@ -8,7 +8,7 @@ const program = new Command();
 program
   .name('drafts')
   .description('CLI for interacting with the macOS Drafts app')
-  .version('1.0.11')
+  .version('1.0.12')
   .option('--json', 'Output raw JSON instead of formatted tables');
 
 // --- Formatting helpers ---
